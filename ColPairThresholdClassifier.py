@@ -12,6 +12,7 @@ class ColPairThresholdClassifier:
 
     def load_data(self, df, target, timer=False):
         setattr(self, 'data_cols', df.columns.drop(target)) # Names of all columns besides target
+        setattr(self, 'target_col', target)                 # Name of the target column
         setattr(self, 'species_vals', df[target].unique())  # Unique values represented in the target column
 
         if not target in df.columns: # TODO make this a real error
@@ -87,8 +88,11 @@ class ColPairThresholdClassifier:
             prediction = self.predict_on_row(row)
             print(prediction)
     
-            
+
     def predict_on_row(self, row: pd.Series):
+        if self.target_col in row:
+            row = row.drop(self.target_col)
+
         row_keys = row.keys()
         
         for col_1_i in range(len(row_keys)):
