@@ -9,6 +9,25 @@ class ColPairThresholdClassifier:
     def __init__(self):
         self.model = {}
         
+    def fit(self, data_cols, target_col, timer=False):
+        setattr(self, 'data_col_names', data_cols.columns)      # Names of all columns besides target
+        setattr(self, 'target_col_name', target_col.columns[0]) # Name of the target column
+        setattr(self, 'species_vals', target_col.unique())      # Unique values represented in the target column
+
+        for col_1 in range(len(self.data_col_names)):
+            for col_2 in range(col_1, len(self.data_col_names)):
+                start_time = time.time()
+                lines = get_best_lines(data_cols[self.data_col_names[col_1]], data_cols[self.data_col_names[col_2]], target_col, self.species_vals)
+                self.model[(self.data_col_names[col_1], self.data_col_names[col_2])] = lines
+                end_time = time.time()
+                if timer:
+                    print(f'Line fitting took {end_time - start_time} seconds for column pair {self.data_col_names[col_1]}, {self.data_col_names[col_2]}')
+
+        if timer:
+            print("Model loaded")
+
+    def predict(self, data_cols):
+        return [self.predict_on_row(row) for index, row in data_cols.iterrows()]
 
     def load_data(self, df, target, timer=False):
         setattr(self, 'data_cols', df.columns.drop(target)) # Names of all columns besides target
