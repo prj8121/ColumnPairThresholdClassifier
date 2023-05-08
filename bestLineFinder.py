@@ -40,15 +40,19 @@ def test_line(slope, intercept, data : TwoDimData):
         # Note that this means points on the line will be marked as below
         else:
             below.append(i)
+
+    above = data.col2 > (slope * data.col1) + intercept
+    below = data.col2 <= (slope * data.col1) + intercept
     
-    num_above = len(above)
-    num_below = len(below)
+    num_above = sum(above)
+    num_below = sum(below)
     
     scores = {}
     
     for c in data.classes:
-        num_c_above = len(data.class_col[above][data.class_col == c])
-        num_c_below = len(data.class_col[below][data.class_col == c])
+        class_col = pd.Series(data.class_col)
+        num_c_above = len(class_col[above][class_col == c])
+        num_c_below = len(class_col[below][class_col == c])
         
         not_c_above = num_above - num_c_above
         not_c_below = num_below - num_c_below
