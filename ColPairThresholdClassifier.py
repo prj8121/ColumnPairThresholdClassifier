@@ -115,8 +115,10 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
 
                     points[c] = res
 
-                plt.subplot(4,4, (col_1 * 4) + col_2 + 1)
-                plt.scatter(data_cols[:, col_1], data_cols[:, col_2], s=7, c=colors)
+                plt.subplot(num_columns, num_columns, (col_1 * num_columns) + col_2 + 1)
+                scatter_size = 7
+                title_font_size = scatter_size * 1.25
+                plt.scatter(data_cols[:, col_1], data_cols[:, col_2], s=scatter_size, c=colors)
                 for c in lines.keys():
                     plt.plot([points[c][0][0], points[c][1][0]], [points[c][0][1], points[c][1][1]], c=color_map[c], marker= '^' if lines[c].direction else 'v')
-                plt.title(f'{column_labels[col_1]}, {column_labels[col_2]}')
+                plt.title(f'{column_labels[col_1]}, {column_labels[col_2]}', fontsize = title_font_size)
