@@ -67,6 +67,7 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
 
         return result
     
+    
     def plot(self, data_cols: np.ndarray, target_col: np.ndarray, column_labels: list, class_labels: list):
         num_classes = len(class_labels)
         num_columns = data_cols.shape[1]
@@ -88,6 +89,12 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
     
         plt.figure(figsize=(12, 12))
 
+        col_mins = []
+        col_maxs = []
+        for col_i in range(num_columns):
+            col_mins.append(data_cols[:, col_i].min())
+            col_maxs.append(data_cols[:, col_i].max())
+
         for col_1 in range(num_columns):
             for col_2 in range(col_1, num_columns):
                 points = {}
@@ -95,11 +102,10 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
                 if not no_model:
                     lines = self.model[(col_1, col_2)]
                     
-                    # could memoize these because there is some reuse
-                    x_min = data_cols[:, col_1].min()
-                    x_max = data_cols[:, col_1].max()
-                    y_min = data_cols[:, col_2].min()
-                    y_max = data_cols[:, col_2].max()
+                    x_min = col_mins[col_1]
+                    x_max = col_maxs[col_1]
+                    y_min = col_mins[col_2]
+                    y_max = col_maxs[col_2]
 
                     for c in lines.keys():
 
