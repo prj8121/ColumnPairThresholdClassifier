@@ -9,14 +9,27 @@ from bestLineFinder import get_best_lines
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
+    
     def __init__(self):
         self.model = {}
         
-    def fit(self, data_cols, target_col, timer=False):
+    def fit(self, data_cols: np.ndarray, target_col: np.ndarray, timer=False):
+        """ Trains model to be used to predict classes in target_col based on data in data_cols
+
+        Args:
+            data_cols (np.ndarray): the datapoints excluding the target column
+            target_col (np.ndarray): the class values for each datapoint
+            timer (bool, optional): flag that turns on timer prints. Defaults to False.
+
+        Raises:
+            ValueError: When data_cols is empty
+            ValueError: When target_col is empty
+        """
         if data_cols.size == 0:
             raise ValueError("data_cols must not be empty")
         if target_col.size == 0:
             raise ValueError("target_col must not be empty")
+        # TODO: Add Value error when data_cols and target_col aren't of the same length
         
         num_cols = len(data_cols[0])
 
@@ -36,7 +49,18 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
             print("Model loaded")
 
 
-    def predict(self, data_cols):
+    def predict(self, data_cols: np.ndarray) -> list:
+        """ Uses the model trained in the fit function to predict the class of each input row
+
+        Args:
+            data_cols (np.ndarray): the datapoints excluding the target column
+
+        Raises:
+            ValueError: When data_cols is empty
+
+        Returns:
+            list: list of predictions
+        """
         if data_cols.size == 0:
             raise ValueError("data_cols must not be empty")
         
@@ -69,6 +93,18 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
     
     
     def plot(self, data_cols: np.ndarray, target_col: np.ndarray, column_labels: list, class_labels: list):
+        """ Plots the input data points and the lines from the model
+
+        Args:
+            data_cols (np.ndarray): the datapoints excluding the target column
+            target_col (np.ndarray): the class values for each datapoint
+            column_labels (list): The labels for the data_cols
+            class_labels (list): List of target class names
+
+        Raises:
+            ValueError: When column_labels don't match the number of columns in data_cols
+            ValueError: When class_labels don't match the number of unique classes
+        """
         num_classes = len(class_labels)
         num_columns = data_cols.shape[1]
 
@@ -78,10 +114,12 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
         if len(class_labels) != len(np.unique(target_col)):
             raise ValueError(f'length of class_labels ({len(class_labels)}) must match the number of unique values in target_col ({len(np.unique(target_col))})')
 
+        # Check if model has been fit
         no_model = True
         if self.model:
             no_model = False
 
+        # Build color column
         color_list = [colorsys.hsv_to_rgb(hue/num_classes, 1, 1) for hue in range(num_classes)]
         color_map = {i:color_list[i] for i in range(num_classes)}
         color_map_func = np.vectorize(lambda x: color_map.get(x, (0, 1, 0)), otypes=[tuple])
@@ -89,6 +127,7 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
     
         plt.figure(figsize=(12, 12))
 
+        # Calculate bounds for lines to be plotted premtively to avoid duiplication of efforts
         col_mins = []
         col_maxs = []
         for col_i in range(num_columns):
@@ -97,6 +136,8 @@ class ColPairThresholdClassifier(BaseEstimator, ClassifierMixin):
 
         for col_1 in range(num_columns):
             for col_2 in range(col_1, num_columns):
+
+                # Calculate endpoints of lines to be plotted
                 points = {}
                 lines = {}
                 if not no_model:
